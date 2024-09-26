@@ -31,4 +31,16 @@ describe('Library Management System', () => {
         library.returnBook(book.isbn);
         expect(library.getBooks()).toHaveLength(1); // The book should be available again
     });
+
+    test('should get available books', () => {
+        const book1 = new Book('1234567890', 'Test Book 1', 'Test Author', 2022);
+        const book2 = new Book('0987654321', 'Test Book 2', 'Test Author', 2021);
+        library.addBook(book1);
+        library.addBook(book2);
+        library.borrowBook(book1.isbn);
+        
+        const availableBooks = library.getBooks();
+        expect(availableBooks).toHaveLength(1);
+        expect(availableBooks[0]).toEqual(book2);
+    });
 });
