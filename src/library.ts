@@ -1,32 +1,37 @@
-// src/library.ts
 import { Book } from './book';
 
 export class Library {
-    private books: { book: Book; available: boolean }[] = [];
+  private books: Map<string, Book> = new Map();
+  private borrowedBooks: Set<string> = new Set();
 
-    addBook(book: Book): void {
-        this.books.push({ book, available: true });
+  addBook(book: Book): void {
+    if (this.books.has(book.isbn)) {
+      throw new Error('Book with this ISBN already exists');
     }
+    this.books.set(book.isbn, book);
+  }
 
-    borrowBook(isbn: string): void {
-        const bookEntry = this.books.find(b => b.book.isbn === isbn && b.available);
-        if (bookEntry) {
-            bookEntry.available = false; // Mark the book as borrowed
-        } else {
-            throw new Error('Book is not available');
-        }
+  borrowBook(isbn: string): void {
+    if (!this.books.has(isbn) || this.borrowedBooks.has(isbn)) {
+      throw new Error('Book is not available');
     }
+    this.borrowedBooks.add(isbn);
+  }
 
-    returnBook(isbn: string): void {
-        const bookEntry = this.books.find(b => b.book.isbn === isbn);
-        if (bookEntry) {
-            bookEntry.available = true; // Mark the book as available
-        } else {
-            throw new Error('This book does not belong to the library');
-        }
+  returnBook(isbn: string): void {
+    if (!this.borrowedBooks.has(isbn)) {
+      throw new Error('This book does not belong to the library');
     }
+    this.borrowedBooks.delete(isbn);
+  }
 
-    getBooks(): Book[] {
-        return this.books.filter(b => b.available).map(b => b.book);
+  viewAvailableBooks(): Book[] {
+    const availableBooks: Book[] = [];
+    for (const [isbn, book] of this.books) {
+      if (!this.borrowedBooks.has(isbn)) {
+        availableBooks.push(book);
+      }
     }
+    return availableBooks;
+  }
 }
